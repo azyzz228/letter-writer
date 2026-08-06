@@ -1,12 +1,14 @@
 defmodule LetterWriter.Release do
-  @moduledoc false
-
+  @moduledoc """
+  Used for executing DB release tasks when run in production without Mix
+  installed.
+  """
   @app :letter_writer
 
   def migrate do
     load_app()
 
-    for repo <- Application.fetch_env!(@app, :ecto_repos) do
+    for repo <- repos() do
       {:ok, _, _} = Ecto.Migrator.with_repo(repo, &Ecto.Migrator.run(&1, :up, all: true))
     end
   end
@@ -16,7 +18,13 @@ defmodule LetterWriter.Release do
     {:ok, _, _} = Ecto.Migrator.with_repo(repo, &Ecto.Migrator.run(&1, :down, to: version))
   end
 
+  defp repos do
+    Application.fetch_env!(@app, :ecto_repos)
+  end
+
   defp load_app do
-    Application.load(@app)
+    # Many platforms require SSL when connecting to the database
+    Application.ensure_all_started(:ssl)
+    Application.ensure_loaded(@app)
   end
 end

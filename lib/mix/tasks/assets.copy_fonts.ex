@@ -4,8 +4,14 @@ defmodule Mix.Tasks.Assets.CopyFonts do
   @shortdoc "Copies the self-hosted variable fonts into priv/static"
 
   @fonts [
+    {"caveat", "caveat-cyrillic-ext-wght-normal.woff2"},
+    {"caveat", "caveat-cyrillic-wght-normal.woff2"},
     {"caveat", "caveat-latin-wght-normal.woff2"},
+    {"cormorant-garamond", "cormorant-garamond-cyrillic-ext-wght-normal.woff2"},
+    {"cormorant-garamond", "cormorant-garamond-cyrillic-wght-normal.woff2"},
     {"cormorant-garamond", "cormorant-garamond-latin-wght-normal.woff2"},
+    {"eb-garamond", "eb-garamond-cyrillic-ext-wght-normal.woff2"},
+    {"eb-garamond", "eb-garamond-cyrillic-wght-normal.woff2"},
     {"eb-garamond", "eb-garamond-latin-wght-normal.woff2"}
   ]
 

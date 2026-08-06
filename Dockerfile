@@ -1,71 +1,69 @@
-# Find eligible builder and runner images on Docker Hub. We use Ubuntu/Debian
-# instead of Alpine to avoid DNS resolution issues in production.
-#
-# https://hub.docker.com/r/hexpm/elixir/tags?page=1&name=ubuntu
-# https://hub.docker.com/_/ubuntu?tab=tags
-#
 # This file is based on these images:
 #
-#   - https://hub.docker.com/r/hexpm/elixir/tags - for the build image
-#   - https://hub.docker.com/_/debian?tab=tags&page=1&name=bullseye-20230612-slim - for the release image
-#   - https://pkgs.org/ - resource for finding needed packages
-#   - Ex: hexpm/elixir:1.18.4-erlang-27.3.4.3-debian-trixie-20250908-slim
+#   - https://hub.docker.com/r/hexpm/elixir/tags - for the builder image
+#     E.g.: docker.io/hexpm/elixir:1.18.1-erlang-27.0.1-debian-trixie-20260610-slim
+#   - https://hub.docker.com/_/debian/tags?name=trixie-20260610-slim - for the runner image
+#     E.g.: docker.io/debian:trixie-20260610-slim
+#
+# Find builder and runner images on Docker Hub or on Hex's Build Server (Bob).
+# We recommend using Bob's Web UI to find recent tags:
+#
+#   - https://bob.hex.pm/docker
+#
+# We suggest using the same Debian version for both the builder and runner images.
+#
+# We suggest Debian/Ubuntu instead of Alpine to avoid production compatibility issues
+# (such as DNS resolution failures, and dynamically linked NIFs/precompiled binaries).
+#
+# For finding packages in Debian, search on https://packages.debian.org/.
 
-ARG ELIXIR_VERSION=1.19
-ARG OTP_VERSION=27.3.4.5
-ARG DEBIAN_VERSION=trixie-20260112-slim
-ARG NODE_MAJOR=22
+ARG ELIXIR_VERSION=1.18.1
+ARG OTP_VERSION=27.0.1
+ARG DEBIAN_VERSION=trixie-20260610-slim
 
-ARG BUILDER_IMAGE="hexpm/elixir:${ELIXIR_VERSION}-erlang-${OTP_VERSION}-debian-${DEBIAN_VERSION}"
-ARG RUNNER_IMAGE="debian:${DEBIAN_VERSION}"
+ARG BUILDER_IMAGE="docker.io/hexpm/elixir:${ELIXIR_VERSION}-erlang-${OTP_VERSION}-debian-${DEBIAN_VERSION}"
+ARG RUNNER_IMAGE="docker.io/debian:${DEBIAN_VERSION}"
 
-# ============================================================
-# Builder stage
-# ============================================================
 FROM ${BUILDER_IMAGE} AS builder
 
-# Install build dependencies + Node.js via NodeSource
-ARG NODE_MAJOR
-RUN apt-get update && apt-get install -y --no-install-recommends \
-      build-essential curl git ca-certificates \
-    && curl -fsSL https://deb.nodesource.com/setup_${NODE_MAJOR}.x | bash - \
-    && apt-get install -y --no-install-recommends nodejs \
-    && rm -rf /var/lib/apt/lists/*
+# install build dependencies
+RUN apt-get update \
+  && apt-get install -y --no-install-recommends build-essential git \
+  && rm -rf /var/lib/apt/lists/*
 
+# prepare build dir
 WORKDIR /app
 
-# Install hex + rebar
-RUN mix local.hex --force && \
-    mix local.rebar --force
+# install hex + rebar
+RUN mix local.hex --force \
+  && mix local.rebar --force
 
+# set build ENV
 ENV MIX_ENV="prod"
 
-# Install mix dependencies
+# install mix dependencies
 COPY mix.exs mix.lock ./
 RUN mix deps.get --only $MIX_ENV
 RUN mkdir config
 
-# Copy compile-time config files before compiling dependencies
-# so that any relevant config change triggers a re-compile.
+# copy compile-time config files before we compile dependencies
+# to ensure any relevant config change will trigger the dependencies
+# to be re-compiled.
 COPY config/config.exs config/${MIX_ENV}.exs config/
 RUN mix deps.compile
 
-COPY priv priv
-COPY lib lib
-
-# Copy JS/TS project files
-# tsconfig.json* uses a glob so the COPY succeeds even if the file is absent
-COPY package.json package-lock.json ./
-COPY tsconfig.json* ./
-COPY assets assets
-
-# Install JS deps and build assets
 RUN mix assets.setup
 
-# Compile the Elixir release
+COPY priv priv
+
+COPY lib lib
+
+# Compile the release
 RUN mix compile
 
-# Build assets with Vite (client + SSR)
+COPY assets assets
+
+# compile assets
 RUN mix assets.deploy
 
 # Changes to config/runtime.exs don't require recompiling the code
@@ -74,23 +72,17 @@ COPY config/runtime.exs config/
 COPY rel rel
 RUN mix release
 
-# ============================================================
-# Runner stage
-# ============================================================
-FROM ${RUNNER_IMAGE}
+# start a new build stage so that the final image will only contain
+# the compiled release and other runtime necessities
+FROM ${RUNNER_IMAGE} AS final
 
-ARG NODE_MAJOR=22
-
-# Install runtime deps, Node.js (for LiveVue SSR), tini, and locale tools
-# in a single layer to minimise redundant apt index fetches
 RUN apt-get update \
-    && apt-get install -y --no-install-recommends curl ca-certificates \
-    && curl -fsSL https://deb.nodesource.com/setup_${NODE_MAJOR}.x | bash - \
-    && apt-get install -y --no-install-recommends \
-         libstdc++6 openssl libncurses6 locales nodejs tini \
-    && sed -i '/en_US.UTF-8/s/^# //g' /etc/locale.gen \
-    && locale-gen \
-    && rm -rf /var/lib/apt/lists/*
+  && apt-get install -y --no-install-recommends libstdc++6 openssl libncurses6 locales ca-certificates \
+  && rm -rf /var/lib/apt/lists/*
+
+# Set the locale
+RUN sed -i '/en_US.UTF-8/s/^# //g' /etc/locale.gen \
+  && locale-gen
 
 ENV LANG=en_US.UTF-8
 ENV LANGUAGE=en_US:en
@@ -99,19 +91,17 @@ ENV LC_ALL=en_US.UTF-8
 WORKDIR "/app"
 RUN chown nobody /app
 
+# set runner ENV
+ENV MIX_ENV="prod"
+
 # Only copy the final release from the build stage
-COPY --from=builder --chown=nobody:root /app/_build/prod/rel/letter_writer ./
+COPY --from=builder --chown=nobody:root /app/_build/${MIX_ENV}/rel/letter_writer ./
 
 USER nobody
 
-EXPOSE 4000
+# If using an environment that doesn't automatically reap zombie processes, it is
+# advised to add an init process such as tini via `apt-get install`
+# above and adding an entrypoint. See https://github.com/krallin/tini for details
+# ENTRYPOINT ["/tini", "--"]
 
-HEALTHCHECK --interval=30s --timeout=5s --start-period=15s \
-  CMD curl -f http://localhost:4000/health || exit 1
-
-# tini handles signal forwarding and zombie reaping
-ENTRYPOINT ["/usr/bin/tini", "--"]
-# Apply pending database migrations before starting the server. `exec` replaces
-# the shell with the release process so it receives signals directly from tini.
-CMD ["/bin/sh", "-c", "/app/bin/migrate && exec /app/bin/server"]
-
+CMD ["/app/bin/server"]

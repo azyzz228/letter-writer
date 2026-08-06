@@ -6,9 +6,10 @@ import Config
 # to provide built-in test partitioning in CI environment.
 # Run `mix help test` for more information.
 config :letter_writer, LetterWriter.Repo,
-  username: System.get_env("POSTGRES_USER") || System.get_env("USER") || "postgres",
-  password: System.get_env("POSTGRES_PASSWORD"),
+  username: System.get_env("POSTGRES_USER") || "postgres",
+  password: System.get_env("POSTGRES_PASSWORD") || "postgres",
   hostname: "localhost",
+  port: String.to_integer(System.get_env("POSTGRES_PORT") || "5440"),
   database: "letter_writer_test#{System.get_env("MIX_TEST_PARTITION")}",
   pool: Ecto.Adapters.SQL.Sandbox,
   pool_size: System.schedulers_online() * 2

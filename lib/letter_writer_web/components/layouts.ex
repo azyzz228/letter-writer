@@ -93,5 +93,4 @@ defmodule LetterWriterWeb.Layouts do
     </div>
     """
   end
-
 end

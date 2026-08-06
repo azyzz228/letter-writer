@@ -11,13 +11,14 @@ config :letter_writer,
   ecto_repos: [LetterWriter.Repo],
   generators: [timestamp_type: :utc_datetime, binary_id: true]
 
+config :letter_writer, LetterWriter.Repo, log: false
+
 config :letter_writer, LetterWriter.Vault,
   json_library: Jason,
   ciphers: [
     default:
       {Cloak.Ciphers.AES.GCM,
-       tag: "AES.GCM.V1",
-       key: Base.decode64!("MDEyMzQ1Njc4OWFiY2RlZjAxMjM0NTY3ODlhYmNkZWY=")}
+       tag: "AES.GCM.V1", key: Base.decode64!("MDEyMzQ1Njc4OWFiY2RlZjAxMjM0NTY3ODlhYmNkZWY=")}
   ]
 
 config :letter_writer, Oban,

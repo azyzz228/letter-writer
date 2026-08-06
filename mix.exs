@@ -87,8 +87,13 @@ defmodule LetterWriter.MixProject do
       "ecto.reset": ["ecto.drop", "ecto.setup"],
       test: ["ecto.create --quiet", "ecto.migrate --quiet", "test"],
       "assets.setup": ["tailwind.install --if-missing", "esbuild.install --if-missing"],
-      "assets.build": ["tailwind letter_writer", "esbuild letter_writer"],
+      "assets.build": [
+        "assets.copy_fonts",
+        "tailwind letter_writer",
+        "esbuild letter_writer"
+      ],
       "assets.deploy": [
+        "assets.copy_fonts",
         "tailwind letter_writer --minify",
         "esbuild letter_writer --minify",
         "phx.digest"

@@ -13,7 +13,9 @@ defmodule LetterWriterWeb.ManageController do
         )
 
       {:error, :not_found} ->
-        conn |> put_status(:not_found) |> render(:not_found, page_title: "Management link unavailable")
+        conn
+        |> put_status(:not_found)
+        |> render(:not_found, page_title: "Management link unavailable")
     end
   end
 
@@ -25,7 +27,9 @@ defmodule LetterWriterWeb.ManageController do
         |> redirect(to: ~p"/manage/#{id}/#{token}")
 
       {:error, :not_found} ->
-        conn |> put_status(:not_found) |> render(:not_found, page_title: "Management link unavailable")
+        conn
+        |> put_status(:not_found)
+        |> render(:not_found, page_title: "Management link unavailable")
     end
   end
 end

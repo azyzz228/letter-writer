@@ -1,5 +1,9 @@
 {
   "private": true,
+  "scripts": {
+    "test": "vitest run",
+    "test:e2e": "playwright test"
+  },
   "dependencies": {
     "@fontsource-variable/caveat": "^5.2.7",
     "@fontsource-variable/cormorant-garamond": "^5.2.7",
@@ -10,5 +14,9 @@
     "@tiptap/extension-text-align": "^3.27.3",
     "@tiptap/extension-text-style": "^3.27.3",
     "@tiptap/starter-kit": "^3.27.3"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.55.0",
+    "vitest": "^3.2.4"
   }
 }

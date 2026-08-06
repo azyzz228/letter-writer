@@ -46,7 +46,9 @@
       <.icon name="hero-lock-closed-mini" class="size-5" />
       <div>
         <strong>The words remain private.</strong>
-        <p>This page can show delivery status and recall the letter, but it can never reveal or edit its contents.</p>
+        <p>
+          This page can show delivery status and recall the letter, but it can never reveal or edit its contents.
+        </p>
       </div>
     </div>
 
@@ -60,9 +62,10 @@
         id="revoke-letter-form"
         action={~p"/manage/#{@status.id}/#{@management_token}/revoke"}
         method="post"
-        data-confirm="Recall this letter permanently?"
       >
-        <button type="submit" class="danger-button">Recall permanently</button>
+        <button type="submit" class="danger-button" data-confirm="Recall this letter permanently?">
+          Recall permanently
+        </button>
       </.form>
     </div>
   </section>

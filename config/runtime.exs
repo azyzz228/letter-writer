@@ -28,9 +28,7 @@ if config_env() == :prod do
   config :letter_writer, LetterWriter.Vault,
     json_library: Jason,
     ciphers: [
-      default:
-        {Cloak.Ciphers.AES.GCM,
-         tag: "AES.GCM.V1", key: Base.decode64!(encryption_key)}
+      default: {Cloak.Ciphers.AES.GCM, tag: "AES.GCM.V1", key: Base.decode64!(encryption_key)}
     ]
 
   database_url =

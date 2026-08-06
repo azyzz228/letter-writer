@@ -2,9 +2,10 @@ import Config
 
 # Configure your database
 config :letter_writer, LetterWriter.Repo,
-  username: System.get_env("POSTGRES_USER") || System.get_env("USER") || "postgres",
-  password: System.get_env("POSTGRES_PASSWORD"),
+  username: System.get_env("POSTGRES_USER") || "postgres",
+  password: System.get_env("POSTGRES_PASSWORD") || "postgres",
   hostname: "localhost",
+  port: String.to_integer(System.get_env("POSTGRES_PORT") || "5440"),
   database: "letter_writer_dev",
   stacktrace: true,
   show_sensitive_data_on_connection_error: true,

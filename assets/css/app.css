@@ -1,11 +1,32 @@
-@import "../node_modules/@fontsource-variable/caveat/wght.css";
-@import "../node_modules/@fontsource-variable/cormorant-garamond/wght.css";
-@import "../node_modules/@fontsource-variable/eb-garamond/wght.css";
 @import "tailwindcss" source(none);
 @source "../css";
 @source "../js";
 @source "../../lib/letter_writer_web";
 @plugin "../vendor/heroicons";
+
+@font-face {
+  font-family: "Caveat Variable";
+  font-style: normal;
+  font-display: swap;
+  font-weight: 400 700;
+  src: url("/fonts/caveat-latin-wght-normal.woff2") format("woff2-variations");
+}
+
+@font-face {
+  font-family: "Cormorant Garamond Variable";
+  font-style: normal;
+  font-display: swap;
+  font-weight: 300 700;
+  src: url("/fonts/cormorant-garamond-latin-wght-normal.woff2") format("woff2-variations");
+}
+
+@font-face {
+  font-family: "EB Garamond Variable";
+  font-style: normal;
+  font-display: swap;
+  font-weight: 400 800;
+  src: url("/fonts/eb-garamond-latin-wght-normal.woff2") format("woff2-variations");
+}
 
 @custom-variant phx-click-loading (.phx-click-loading&, .phx-click-loading &);
 @custom-variant phx-submit-loading (.phx-submit-loading&, .phx-submit-loading &);

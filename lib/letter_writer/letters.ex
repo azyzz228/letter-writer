@@ -155,13 +155,13 @@ defmodule LetterWriter.Letters do
         %Letter{closed_at: nil, expires_at: expires_at} = letter when not is_nil(expires_at) ->
           if DateTime.compare(expires_at, now) != :gt do
             letter = letter |> Letter.close_changeset(:expired, now) |> Repo.update!()
-            {:expired, letter}
+            {:ok, {:expired, letter}}
           else
-            :early
+            {:ok, :early}
           end
 
         _ ->
-          :noop
+          {:ok, :noop}
       end
     end)
     |> case do
@@ -257,14 +257,14 @@ defmodule LetterWriter.Letters do
             })
             |> Repo.insert!()
 
-          {:ok, letter, grant}
+          {:ok, {letter, grant}}
         else
           Repo.rollback(:unavailable)
         end
       end)
 
     case result do
-      {:ok, {:ok, letter, grant}} ->
+      {:ok, {letter, grant}} ->
         if letter.closed_reason == :exhausted, do: schedule_purge(letter)
 
         :telemetry.execute([:letter_writer, :letters, :unlocked], %{count: 1})
@@ -288,11 +288,20 @@ defmodule LetterWriter.Letters do
   defp status_map(letter) do
     status =
       cond do
-        letter.closed_reason == :revoked -> :revoked
-        letter.closed_reason == :exhausted -> :exhausted
-        letter.closed_reason == :expired -> :expired
-        letter.expires_at && DateTime.compare(letter.expires_at, DateTime.utc_now()) != :gt -> :expired
-        true -> :sealed
+        letter.closed_reason == :revoked ->
+          :revoked
+
+        letter.closed_reason == :exhausted ->
+          :exhausted
+
+        letter.closed_reason == :expired ->
+          :expired
+
+        letter.expires_at && DateTime.compare(letter.expires_at, DateTime.utc_now()) != :gt ->
+          :expired
+
+        true ->
+          :sealed
       end
 
     %{

@@ -30,6 +30,7 @@ import CharacterCount from "@tiptap/extension-character-count"
 import TextAlign from "@tiptap/extension-text-align"
 import Color from "@tiptap/extension-color"
 import {TextStyle} from "@tiptap/extension-text-style"
+import {generatePassphrase, passwordScore} from "./letter_security"
 
 const draftKey = "sealed:letter-draft"
 
@@ -175,9 +176,7 @@ const SealForm = {
     })
 
     this.el.querySelector("[data-generate-passphrase]")?.addEventListener("click", () => {
-      const words = ["amber", "beloved", "candle", "distant", "evening", "forever", "garden", "harbor", "lilac", "moon", "paper", "promise", "quiet", "ribbon", "starlight", "together"]
-      const chosen = Array.from({length: 5}, () => words[crypto.getRandomValues(new Uint32Array(1))[0] % words.length])
-      const passphrase = chosen.join("-")
+      const passphrase = generatePassphrase(() => crypto.getRandomValues(new Uint32Array(1)))
       const password = this.el.querySelector('[name="seal_form[password]"]')
       const confirmation = this.el.querySelector('[name="seal_form[password_confirmation]"]')
       password.value = passphrase
@@ -192,11 +191,7 @@ const SealForm = {
   updateStrength(password) {
     const bar = this.el.querySelector("[data-password-strength]")
     if (!bar) return
-    let score = 0
-    if (password.length >= 8) score++
-    if (password.length >= 14) score++
-    if (/[A-Z]/.test(password) && /[a-z]/.test(password)) score++
-    if (/\d|[^\w\s]/.test(password)) score++
+    const score = passwordScore(password)
     bar.style.width = `${score * 25}%`
     bar.dataset.score = score
   },

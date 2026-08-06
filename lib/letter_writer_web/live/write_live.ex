@@ -45,7 +45,8 @@ defmodule LetterWriterWeb.WriteLive do
         {:noreply, assign(socket, :form, to_form(Map.put(changeset, :action, :insert)))}
 
       {:error, _retry_after} ->
-        {:noreply, put_flash(socket, :error, "Please wait a little before sealing another letter.")}
+        {:noreply,
+         put_flash(socket, :error, "Please wait a little before sealing another letter.")}
     end
   end
 

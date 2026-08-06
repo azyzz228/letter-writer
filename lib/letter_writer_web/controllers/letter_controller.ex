@@ -21,7 +21,9 @@ defmodule LetterWriterWeb.LetterController do
             )
 
           :not_found ->
-            conn |> put_status(:not_found) |> render(:unavailable, page_title: "Letter unavailable")
+            conn
+            |> put_status(:not_found)
+            |> render(:unavailable, page_title: "Letter unavailable")
 
           :unavailable ->
             render(conn, :unavailable, page_title: "Letter unavailable")
@@ -48,7 +50,10 @@ defmodule LetterWriterWeb.LetterController do
         :telemetry.execute([:letter_writer, :letters, :unlock_failed], %{count: 1})
 
         conn
-        |> put_flash(:error, "That password did not open this letter, or the letter is no longer available.")
+        |> put_flash(
+          :error,
+          "That password did not open this letter, or the letter is no longer available."
+        )
         |> redirect(to: ~p"/letters/#{id}")
 
       {:error, _retry_after} ->

@@ -1,0 +1,66 @@
+<Layouts.app flash={@flash}>
+  <section class="hero-shell">
+    <div class="hero-copy">
+      <p class="eyebrow">Private letters for two</p>
+      <h1>Some words deserve more than a text.</h1>
+      <p class="hero-lede">
+        Write a beautiful letter, seal it with a password, and send a private link to someone far away.
+      </p>
+      <div class="hero-actions">
+        <.link navigate={~p"/write"} class="button button-primary" id="hero-write-letter">
+          Write your letter <span aria-hidden="true">→</span>
+        </.link>
+        <a href="#how-it-works" class="text-link">See how it works</a>
+      </div>
+      <div class="privacy-note">
+        <.icon name="hero-lock-closed-mini" class="size-4" />
+        Password protected · encrypted at rest · no account needed
+      </div>
+    </div>
+
+    <div class="hero-letter-stage" aria-hidden="true">
+      <div class="hero-letter">
+        <p class="letter-date">Across every mile</p>
+        <p>My dearest,</p>
+        <p>
+          I wanted these words to arrive slowly—like something held, unfolded, and kept.
+        </p>
+        <p class="letter-signature">Always yours</p>
+      </div>
+      <div class="hero-envelope">
+        <div class="envelope-address">For someone special</div>
+        <div class="wax-seal">S</div>
+      </div>
+    </div>
+  </section>
+
+  <section class="how-section" id="how-it-works">
+    <p class="eyebrow">A small ritual</p>
+    <h2>From your heart to their hands</h2>
+    <div class="steps-grid">
+      <article>
+        <span>01</span>
+        <h3>Write freely</h3>
+        <p>Use a calm, paper-like editor with just enough formatting to make the words yours.</p>
+      </article>
+      <article>
+        <span>02</span>
+        <h3>Seal it</h3>
+        <p>Choose a password, an expiry date, and exactly how many times it may be opened.</p>
+      </article>
+      <article>
+        <span>03</span>
+        <h3>Send it across</h3>
+        <p>Share the private link and send the password separately. We reveal nothing before unlock.</p>
+      </article>
+    </div>
+  </section>
+
+  <section class="closing-card">
+    <div>
+      <p class="eyebrow">No feed. No noise.</p>
+      <h2>Just one letter, waiting to be opened.</h2>
+    </div>
+    <.link navigate={~p"/write"} class="button button-light">Begin writing</.link>
+  </section>
+</Layouts.app>

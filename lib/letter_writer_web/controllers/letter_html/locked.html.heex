@@ -1,0 +1,37 @@
+<Layouts.app flash={@flash}>
+  <section class="locked-shell">
+    <div class="locked-envelope" aria-hidden="true">
+      <div class="envelope-lines"></div>
+      <div class="locked-wax">S</div>
+    </div>
+    <p class="eyebrow">A private letter is waiting</p>
+    <h1>Only the right words will open it.</h1>
+    <p class="locked-lede">Enter the password the writer shared with you.</p>
+
+    <.form
+      for={@form}
+      id="unlock-letter-form"
+      action={~p"/letters/#{@letter_id}/unlock"}
+      method="post"
+      class="unlock-form"
+    >
+      <.input
+        field={@form[:password]}
+        type="password"
+        label="Letter password"
+        placeholder="Enter password"
+        autocomplete="current-password"
+        autofocus
+        class="app-input unlock-input"
+      />
+      <button class="button button-primary button-full" type="submit" id="unlock-letter-button">
+        Break the seal
+      </button>
+    </.form>
+
+    <div class="privacy-note centered-note">
+      <.icon name="hero-eye-slash-mini" class="size-4" />
+      The letter stays hidden until the password is correct.
+    </div>
+  </section>
+</Layouts.app>

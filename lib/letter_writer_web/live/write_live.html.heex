@@ -1,0 +1,204 @@
+<Layouts.app flash={@flash}>
+  <%= if @state == :sealed do %>
+    <section class="success-shell" id="sealed-success" phx-hook="CopyLinks">
+      <div class="success-seal" aria-hidden="true">S</div>
+      <p class="eyebrow">Your letter is sealed</p>
+      <h1>Ready to cross the distance.</h1>
+      <p class="success-lede">
+        Copy both links now. The private management link cannot be recovered after you leave this page.
+      </p>
+
+      <div class="link-card">
+        <div>
+          <span class="field-kicker">Share with your reader</span>
+          <code id="public-letter-url">{@public_url}</code>
+        </div>
+        <button type="button" class="copy-button" data-copy="#public-letter-url">
+          <.icon name="hero-clipboard-mini" class="size-4" /> Copy
+        </button>
+      </div>
+
+      <div class="link-card private-link-card">
+        <div>
+          <span class="field-kicker">Keep this link private</span>
+          <code id="management-letter-url">{@management_url}</code>
+        </div>
+        <button type="button" class="copy-button" data-copy="#management-letter-url">
+          <.icon name="hero-clipboard-mini" class="size-4" /> Copy
+        </button>
+      </div>
+
+      <div class="notice-card">
+        <.icon name="hero-shield-check-mini" class="size-5" />
+        <p>Send the password through a different channel than the reading link.</p>
+      </div>
+
+      <.link navigate={~p"/write"} class="text-link">Write another letter</.link>
+    </section>
+  <% else %>
+    <section class="compose-shell">
+      <div class="compose-heading">
+        <div>
+          <p class="eyebrow">A letter, in your own hand</p>
+          <h1>Say what the distance cannot.</h1>
+        </div>
+        <p>Your unsealed draft stays only in this browser tab.</p>
+      </div>
+
+      <.form
+        for={@form}
+        id="seal-letter-form"
+        phx-change="validate"
+        phx-submit="seal"
+        phx-hook="SealForm"
+        class="compose-form"
+      >
+        <div class="paper-sheet">
+          <div class="letter-metadata">
+            <.input
+              field={@form[:to_name]}
+              type="text"
+              label="To"
+              placeholder="Someone dear"
+              maxlength="80"
+              class="paper-input"
+            />
+            <.input
+              field={@form[:from_name]}
+              type="text"
+              label="From"
+              placeholder="Your name"
+              maxlength="80"
+              class="paper-input"
+            />
+          </div>
+
+          <.input
+            field={@form[:title]}
+            type="text"
+            label="A small title (optional)"
+            placeholder="For the nights we share the same moon"
+            maxlength="120"
+            class="paper-title-input"
+          />
+
+          <div
+            id="letter-editor"
+            phx-hook="LetterEditor"
+            phx-update="ignore"
+            data-initial-json={@form[:body_json].value || ""}
+          >
+            <div class="editor-toolbar" role="toolbar" aria-label="Letter formatting">
+              <button type="button" data-command="undo" aria-label="Undo">↶</button>
+              <button type="button" data-command="redo" aria-label="Redo">↷</button>
+              <span class="toolbar-divider"></span>
+              <button type="button" data-command="bold" aria-label="Bold"><strong>B</strong></button>
+              <button type="button" data-command="italic" aria-label="Italic"><em>I</em></button>
+              <button type="button" data-command="underline" aria-label="Underline"><u>U</u></button>
+              <button type="button" data-command="blockquote" aria-label="Block quote">“</button>
+              <button type="button" data-command="heading-1" aria-label="Large heading">H1</button>
+              <button type="button" data-command="heading-2" aria-label="Small heading">H2</button>
+              <button type="button" data-command="link" aria-label="Add link">Link</button>
+              <span class="toolbar-divider"></span>
+              <button type="button" data-command="bulletList" aria-label="Bulleted list">• List</button>
+              <button type="button" data-command="orderedList" aria-label="Numbered list">1. List</button>
+              <button type="button" data-command="align-left" aria-label="Align left">←</button>
+              <button type="button" data-command="align-center" aria-label="Align center">↔</button>
+              <button type="button" data-command="align-right" aria-label="Align right">→</button>
+              <span class="toolbar-divider"></span>
+              <button type="button" class="ink-dot ink-brown" data-color="#3b2416" aria-label="Brown ink"></button>
+              <button type="button" class="ink-dot ink-burgundy" data-color="#6f1d2b" aria-label="Burgundy ink"></button>
+              <button type="button" class="ink-dot ink-blue" data-color="#1f3a5f" aria-label="Blue ink"></button>
+              <button type="button" class="ink-dot ink-green" data-color="#26382a" aria-label="Green ink"></button>
+            </div>
+            <div data-editor-surface class="letter-editor-surface"></div>
+            <input
+              type="hidden"
+              name={@form[:body_json].name}
+              value={@form[:body_json].value}
+              data-editor-json
+            />
+            <div class="editor-footer">
+              <span>Write slowly. There is no rush.</span>
+              <span data-character-count>0 / 20,000</span>
+            </div>
+          </div>
+          <p :for={error <- Enum.map(@form[:body_json].errors, &translate_error/1)} class="field-error">
+            {error}
+          </p>
+        </div>
+
+        <aside class="seal-panel">
+          <div class="seal-panel-heading">
+            <div class="mini-seal">S</div>
+            <div>
+              <span class="field-kicker">Before you seal it</span>
+              <h2>Choose how it opens</h2>
+            </div>
+          </div>
+
+          <div class="form-stack">
+            <.input
+              field={@form[:password]}
+              type="password"
+              label="Letter password"
+              placeholder="At least 8 characters"
+              minlength="8"
+              maxlength="128"
+              autocomplete="new-password"
+              class="app-input"
+            />
+            <div class="password-tools">
+              <div class="strength-track"><span data-password-strength></span></div>
+              <button type="button" data-generate-passphrase>Generate a passphrase</button>
+            </div>
+            <.input
+              field={@form[:password_confirmation]}
+              type="password"
+              label="Confirm password"
+              placeholder="Repeat the password"
+              maxlength="128"
+              autocomplete="new-password"
+              class="app-input"
+            />
+
+            <div class="settings-group">
+              <.input field={@form[:unlimited]} type="checkbox" label="Allow unlimited openings" />
+              <%= unless @form[:unlimited].value in [true, "true"] do %>
+                <.input
+                  field={@form[:max_opens]}
+                  type="number"
+                  label="Number of openings"
+                  min="1"
+                  max="10"
+                  class="app-input"
+                />
+              <% end %>
+            </div>
+
+            <div class="settings-group">
+              <.input field={@form[:never_expires]} type="checkbox" label="This letter never expires" />
+              <%= unless @form[:never_expires].value in [true, "true"] do %>
+                <.input
+                  field={@form[:expires_at]}
+                  type="datetime-local"
+                  label="Available until (UTC)"
+                  class="app-input"
+                />
+              <% end %>
+            </div>
+          </div>
+
+          <div class="seal-warning">
+            <.icon name="hero-information-circle-mini" class="size-5" />
+            Once sealed, the words and password cannot be changed.
+          </div>
+
+          <button type="submit" id="seal-letter-button" class="button button-primary button-full">
+            <span class="button-seal">S</span> Seal this letter
+          </button>
+        </aside>
+      </.form>
+    </section>
+  <% end %>
+</Layouts.app>

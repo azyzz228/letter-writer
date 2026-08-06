@@ -1,0 +1,31 @@
+<Layouts.app flash={@flash}>
+  <section class="reader-shell" id="opened-letter" phx-hook="ReaderPreferences">
+    <div class="reader-topbar">
+      <span class="opened-badge"><span></span> Seal opened</span>
+      <button type="button" class="reader-toggle" data-easy-read aria-pressed="false">
+        <.icon name="hero-book-open-mini" class="size-4" /> Easy read
+      </button>
+    </div>
+
+    <article class="read-paper">
+      <header class="read-letter-header">
+        <div>
+          <span>To</span>
+          <strong>{@payload["to"] || "You"}</strong>
+        </div>
+        <div>
+          <span>From</span>
+          <strong>{@payload["from"] || "Someone who cares"}</strong>
+        </div>
+      </header>
+
+      <h1 :if={@payload["title"]} class="read-title">{@payload["title"]}</h1>
+      <div class="letter-body" data-letter-body>{raw(@payload["html"])}</div>
+      <div class="letter-flourish" aria-hidden="true">❦</div>
+    </article>
+
+    <p class="reader-footnote">
+      This reading session stays open for 30 minutes. You may copy or keep the words if the writer intended you to.
+    </p>
+  </section>
+</Layouts.app>

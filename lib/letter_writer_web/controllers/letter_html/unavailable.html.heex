@@ -1,0 +1,11 @@
+<Layouts.app flash={@flash}>
+  <section class="locked-shell unavailable-shell" id="letter-unavailable">
+    <div class="faded-seal" aria-hidden="true">S</div>
+    <p class="eyebrow">The envelope is empty</p>
+    <h1>This letter is no longer available.</h1>
+    <p class="locked-lede">
+      It may have expired, reached its opening limit, or been recalled by its writer.
+    </p>
+    <.link navigate={~p"/write"} class="button button-primary">Write a new letter</.link>
+  </section>
+</Layouts.app>
